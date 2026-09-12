@@ -62,9 +62,14 @@ select:focus-visible{outline:2px solid var(--water);outline-offset:1px}
 .seg button:focus-visible{outline:2px solid var(--water);outline-offset:-2px}
 
 /* ---------- tiles ---------- */
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:1px;
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(146px,1fr));gap:1px;
   background:var(--rule);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
 .tile{background:var(--surface);padding:17px 18px;display:flex;flex-direction:column;gap:4px}
+/* the one tile that is scenario output, not measured trade -- tinted so it is
+   obvious why this number moves with the 10/20/30 control and the others don't */
+.tile.live{background:linear-gradient(0deg,var(--surface-2),var(--surface-2)),var(--surface);
+  box-shadow:inset 3px 0 0 var(--water)}
+.tile.live .v{color:var(--water)}
 .tile .k{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.09em;
   text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:6px}
 .tile .k svg.i{font-size:13px;color:var(--water)}
@@ -181,7 +186,7 @@ footer b{color:var(--ink-2);font-weight:500}
       <select id="country"></select>
     </div>
     <div class="field" style="flex:0 0 auto">
-      <label for="shock">Export cut to stressed suppliers</label>
+      <label for="shock">If stressed suppliers cut exports by</label>
       <div class="seg" id="shock" role="group" aria-label="Shock size">
         <button type="button" data-v="10">10%</button>
         <button type="button" data-v="20" aria-pressed="true">20%</button>
@@ -325,6 +330,9 @@ function render() {
                : asr < 0.25 ? 'thin'
                : asr < 1 ? 'partial' : 'adequate';
   $('tiles').innerHTML = [
+    ['ico-drop',   'Supply to replace',
+     stressedT > 0 ? fmt(stressedT * shock) + ' t' : '—',
+     stressedT > 0 ? `per year, at a ${Math.round(shock * 100)}% cut` : 'no stressed suppliers'],
     ['ico-grain',  'Rice imported', fmt(d.t) + ' t', 'per year, paddy-equivalent'],
     ['ico-wave',   'Largest supplier',
      top ? `<span class="fl">${supFlag(top.s)}</span>${supName(top.s)}` : '—',
