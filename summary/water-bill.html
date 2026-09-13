@@ -290,17 +290,17 @@ $('shock').addEventListener('click', e => {
 });
 
 // ---- allocation, mirroring the notebook's close_gap waterfall ----------------
-// Ranking: existing relationship first, then deliverable volume, then least
-// water-stressed. Water stress is already a gate (every candidate is under 25%),
-// so ranking by it again would put a small clean supplier ahead of one that can
-// actually deliver.
+// Ranking: existing relationship first, then least water-stressed, then
+// deliverable volume. Within the same water-stress tier, a 4% supplier is still
+// treated as meaningfully safer than a 21% one -- size only breaks a tie once
+// water stress is equal.
 function plan(importerIdx, gap) {
   const me = DATA.importers[importerIdx].n;
   const existing = new Set(byImporter[importerIdx].map(f => supName(f.s)));
   const pool = DATA.candidates
     .filter(c => c.n !== me)               // a country cannot be its own backup
     .map(c => ({ ...c, already: existing.has(c.n) }))
-    .sort((a, b) => (b.already - a.already) || (b.h - a.h) || (a.w - b.w));
+    .sort((a, b) => (b.already - a.already) || (a.w - b.w) || (b.h - a.h));
 
   let filled = 0;
   const rows = [];
@@ -386,7 +386,7 @@ function render() {
   const used = p.rows.filter(r => r.take > 0);
   $('gapsub').textContent = stressedT > 0
     ? `At a ${Math.round(shock * 100)}% cut, ${d.n} needs ${fmt(gap)} t/yr replaced. `
-      + `Candidates are ranked by whether a trade relationship already exists, then by how much they could ship.`
+      + `Candidates are ranked by whether a trade relationship already exists, then by water stress, then by how much they could ship.`
     : `${d.n} has no water-stressed suppliers, so there is no gap to fill.`;
 
   $('alts').innerHTML = p.rows.slice(0, 12).map(r => `
